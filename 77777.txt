@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Casino Lucky Draw</title>
+<style>
+* {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+font-family: 'Arial', sans-serif;
+}
+
+body {
+background-color: #0d1117;
+color: #ffffff;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: flex-start;
+min-height: 100vh;
+padding: 10px;
+overflow-x: hidden;
+position: relative;
+}
+
+/* কনফেটি কণার বেসিক স্টাইল */
+.confetti {
+position: absolute;
+width: 10px;
+height: 10px;
+background-color: #ffd700;
+top: -10px;
+z-index: 999;
+animation: fall linear forwards;
+}
+
+@keyframes fall {
+to {
+transform: translateY(105vh) rotate(360deg);
+}
+}
+
+.app-container {
+width: 100%;
+max-width: 500px;
+background-color: #161b22;
+border: 4px solid #ffd700;
+border-radius: 20px;
+padding: 15px;
+box-shadow: 0px 0px 25px rgba(255, 215, 0, 0.2);
+z-index: 10;
+}
+
+.header-title {
+text-align: center;
+font-size: 32px;
+color: #ffd700;
+text-transform: uppercase;
+font-weight: bold;
+letter-spacing: 2px;
+margin-bottom: 20px;
+text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+.main-content {
+display: grid;
+grid-template-columns: 0.5fr 1.5fr;
+gap: 10px;
+}
+
+/* Left Column: Player List */
+.player-list-section {
+border: 2px solid #ffd700;
+border-radius: 10px;
+padding: 5px;
+background-color: #0d1117;
+}
+
+.section-title {
+color: #ffd700;
+font-size: 11px;
+text-align: center;
+margin-bottom: 8px;
+border-bottom: 2px solid #ffd700;
+padding-bottom: 5px;
+font-weight: bold;
+}
+
+.player-slots {
+display: flex;
+flex-direction: column;
+gap: 5px;
+max-height: 480px;
+overflow-y: auto;
+}
+
+.player-slot {
+background-color: #21262d;
+padding: 6px 2px;
+border-radius: 4px;
+font-size: 10px;
+text-align: center;
+border: 1px solid #30363d;
+transition: all 0.3s;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+
+.player-slot.winner-highlight {
+background-color: #238636;
+border-color: #2ea043;
+font-weight: bold;
+transform: scale(1.05);
+}
+
+/* Right Column: Counter & Controls */
+.action-section {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: flex-start;
+border: 2px solid #ffd700;
+border-radius: 10px;
+padding: 10px;
+background-color: #0d1117;
+}
+
+.input-container {
+display: flex;
+gap: 4px;
+width: 100%;
+margin-bottom: 15px;
+}
+
+.name-input {
+flex: 1;
+padding: 8px;
+background-color: #0d1117;
+border: 2px solid #ffd700;
+border-radius: 5px;
+color: #fff;
+outline: none;
+font-size: 12px;
+}
+
+.add-btn {
+background-color: #ff9800;
+color: #000;
+border: none;
+padding: 8px 12px;
+border-radius: 5px;
+font-weight: bold;
+cursor: pointer;
+font-size: 12px;
+}
+
+.slots-container {
+display: flex;
+gap: 8px;
+justify-content: center;
+width: 100%;
+margin-top: 10px;
+}
+
+.digit-box {
+flex: 1;
+height: 140px;
+background-color: #161b22;
+border-radius: 12px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 85px;
+font-weight: bold;
+}
+
+.digit-box.yellow { border: 3px solid #ffd700; color: #ffd700; text-shadow: 0 0 15px #ffd700;}
+.digit-box.green { border: 3px solid #2ea043; color: #2ea043; text-shadow: 0 0 15px #2ea043;}
+.digit-box.red { border: 3px solid #f85149; color: #f85149; text-shadow: 0 0 15px #f85149;}
+
+.winner-display {
+width: 100%;
+border: 2px solid #2ea043;
+background-color: rgba(35, 134, 54, 0.1);
+border-radius: 8px;
+padding: 12px 4px;
+text-align: center;
+margin-top: 25px;
+transition: all 0.3s ease;
+}
+
+.winner-celebrate {
+background-color: rgba(255, 215, 0, 0.2) !important;
+border: 3px solid #ffd700 !important;
+box-shadow: 0 0 20px #ffd700;
+animation: pulse 0.8s infinite alternate;
+}
+
+@keyframes pulse {
+from { transform: scale(1); }
+to { transform: scale(1.03); }
+}
+
+.winner-label {
+color: #2ea043;
+font-size: 12px;
+font-weight: bold;
+letter-spacing: 1px;
+margin-bottom: 5px;
+transition: color 0.3s;
+}
+
+.winner-celebrate .winner-label {
+color: #ffd700;
+}
+
+.winner-name {
+color: #58a6ff;
+font-size: 16px;
+font-weight: bold;
+word-break: break-all;
+}
+
+.winner-celebrate .winner-name {
+color: #ffffff;
+text-shadow: 0 0 10px #ffd700;
+}
+
+.play-btn {
+width: 100%;
+background: linear-gradient(180deg, #ffca28, #ff9800);
+border: none;
+border-radius: 25px;
+color: #000;
+font-size: 22px;
+font-weight: bold;
+padding: 12px;
+cursor: pointer;
+margin-top: 25px;
+box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+transition: transform 0.1s;
+}
+
+.play-btn:disabled {
+background: #30363d;
+color: #8b949e;
+cursor: not-allowed;
+box-shadow: none;
+}
+
+.play-btn:active:not(:disabled) {
+transform: scale(0.98);
+}
+
+.prize-money-box {
+width: 100%;
+border: 2px solid #ffd700;
+background-color: rgba(255, 215, 0, 0.05);
+border-radius: 12px;
+padding: 12px 5px;
+text-align: center;
+margin-top: 20px;
+box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
+}
+
+.prize-label {
+color: #ffd700;
+font-size: 11px;
+font-weight: bold;
+letter-spacing: 1px;
+margin-bottom: 4px;
+text-transform: uppercase;
+}
+
+.prize-amount {
+color: #2ea043;
+font-size: 24px;
+font-weight: bold;
+outline: none;
+border: 1px transparent dashed;
+display: inline-block;
+min-width: 100px;
+padding: 2px 5px;
+border-radius: 4px;
+transition: all 0.2s;
+cursor: pointer;
+}
+
+.prize-amount:focus {
+border-color: #ffd700;
+background-color: #0d1117;
+box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+}
+
+/* Bottom Secret Control Panel */
+.admin-panel {
+margin-top: 180px;
+margin-bottom: 50px;
+width: 100%;
+max-width: 500px;
+background-color: #21262d;
+border: 1px dashed #30363d;
+border-radius: 10px;
+padding: 10px;
+}
+
+.admin-select {
+width: 100%;
+padding: 8px;
+background-color: #0d1117;
+color: #fff;
+border: 1px solid #30363d;
+border-radius: 5px;
+outline: none;
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+<div class="header-title">Lucky Draw</div>
+
+<div class="main-content">
+<div class="player-list-section">
+<div class="section-title">LIST</div>
+<div class="player-slots" id="playerSlotsContainer">
+</div>
+</div>
+
+<div class="action-section">
+<div style="width: 100%;">
+<div class="input-container">
+<input type="text" class="name-input" id="nameInput" placeholder="Enter Name...">
+<button class="add-btn" id="addBtn">Add</button>
+</div>
+
+<div class="slots-container">
+<div class="digit-box yellow" id="box1">0</div>
+<div class="digit-box green" id="box2">0</div>
+<div class="digit-box red" id="box3">0</div>
+</div>
+</div>
+
+<div class="winner-display" id="winnerDisplayBox">
+<div class="winner-label" id="winnerLabelText">WINNER:</div>
+<div class="winner-name" id="winnerNameDisplay">---</div>
+</div>
+
+<button class="play-btn" id="playBtn">PLAY</button>
+
+<div class="prize-money-box">
+<div class="prize-label">PRIZE MONEY</div>
+<div class="prize-amount" id="prizeAmount" contenteditable="true">$`250.00</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="admin-panel">
+<select class="admin-select" id="forcedWinnerSelect">
+<option value="random">Random</option>
+</select>
+</div>
+
+<script>
+let players = [
+"Kkk", "KKKkkkkkkkkkh", "Player #3", "Player #4", "Player #5",
+"Player #6", "Player #7", "Player #8", "Player #9", "Player #10",
+"Player #11", "Player #12", "Player #13", "Player #14", "Player #15",
+"Player #16", "Player #17", "Player #18", "Player #19", "Player #20"
+ ];
+
+let currentReplaceIndex = 0;
+
+const playerSlotsContainer = document.getElementById('playerSlotsContainer');
+const forcedWinnerSelect = document.getElementById('forcedWinnerSelect');
+const playBtn = document.getElementById('playBtn');
+const nameInput = document.getElementById('nameInput');
+const addBtn = document.getElementById('addBtn');
+const box1 = document.getElementById('box1');
+const box2 = document.getElementById('box2');
+const box3 = document.getElementById('box3');
+const winnerNameDisplay = document.getElementById('winnerNameDisplay');
+const winnerDisplayBox = document.getElementById('winnerDisplayBox');
+const winnerLabelText = document.getElementById('winnerLabelText');
+
+function renderInterface() {
+playerSlotsContainer.innerHTML = '';
+const currentSelected = forcedWinnerSelect.value;
+forcedWinnerSelect.innerHTML = '<option value="random">Random</option>';
+
+players.forEach((player, index) => {
+const slot = document.createElement('div');
+slot.className = 'player-slot';
+slot.id = player-slot-${index}; slot.innerText ={player}`;
+playerSlotsContainer.appendChild(slot);
+
+const option = document.createElement('option');
+option.value = index;
+option.innerText = Pos ${index + 1}: ${player};
+forcedWinnerSelect.appendChild(option);
+});
+
+forcedWinnerSelect.value = currentSelected;
+}
+
+function startCelebration() {
+const colors = ['#ffd700', '#2ea043', '#f85149', '#58a6ff', '#ff9800', '#e14eca'];
+for (let i = 0; i < 120; i++) {
+setTimeout(() => {
+const confetti = document.createElement('div');
+confetti.className = 'confetti';
+confetti.style.left = Math.random() * 100 + 'vw';
+confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+confetti.style.width = Math.random() * 8 + 6 + 'px';
+confetti.style.height = Math.random() * 12 + 6 + 'px';
+confetti.style.animationDuration = Math.random() * 2 + 1.5 + 's';
+confetti.style.opacity = Math.random();
+
+document.body.appendChild(confetti);
+
+setTimeout(() => { confetti.remove(); }, 3500);
+}, i * 25);
+}
+}
+
+addBtn.addEventListener('click', () => {
+const newName = nameInput.value.trim();
+if (newName !== "") {
+players[currentReplaceIndex] = newName;
+currentReplaceIndex++;
+if (currentReplaceIndex >= 20) {
+currentReplaceIndex = 0;
+}
+renderInterface();
+nameInput.value = "";
+nameInput.focus();
+}
+});
+
+nameInput.addEventListener('keypress', (e) => {
+if (e.key === 'Enter') {
+addBtn.click();
+}
+});
+
+playBtn.addEventListener('click', () => {
+document.querySelectorAll('.player-slot').forEach(el => el.classList.remove('winner-highlight'));
+winnerDisplayBox.classList.remove('winner-celebrate');
+
+playBtn.disabled = true;
+
+const selectedValue = forcedWinnerSelect.value;
+let winnerIndex;
+
+if (selectedValue === 'random') {
+winnerIndex = Math.floor(Math.random() * players.length);
+} else {
+winnerIndex = parseInt(selectedValue);
+}
+
+let counter = 0;
+const totalTicks = 400; // ১০০ মিলি-সেকেন্ড পর পর মোট ৪০০ বার ঘুরবে (৪০ সেকেন্ড)
+
+const interval = setInterval(() => {
+box1.innerText = Math.floor(Math.random() * 10);
+box2.innerText = Math.floor(Math.random() * 10);
+box3.innerText = Math.floor(Math.random() * 10);
+counter++;
+
+// লাইভ কাউন্টডাউন টেক্সট আপডেট
+let secondsLeft = ((totalTicks - counter) * 0.1).toFixed(1);
+winnerLabelText.innerText = "⏳ SPINNING...";
+winnerNameDisplay.innerText = CHOOSING IN ${secondsLeft}s`;
+
+if (counter >= totalTicks) {
+clearInterval(interval);
+
+const displayNum = String(winnerIndex + 1).padStart(3, '0');
+box1.innerText = displayNum[0];
+box2.innerText = displayNum[1];
+box3.innerText = displayNum[2];
+
+winnerLabelText.innerText = "🎉 WINNER CONGRATS 🎉";
+winnerNameDisplay.innerText = players[winnerIndex].toUpperCase();
+
+winnerDisplayBox.classList.add('winner-celebrate');
+startCelebration();
+
+document.getElementById(player-slot-${winnerIndex}).classList.add('winner-highlight'); document.getElementById(player-slot-${winnerIndex}`).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+playBtn.disabled = false;
+}
+}, 100);
+});
+
+renderInterface();
+</script>
+</body>
+</html>
